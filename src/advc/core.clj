@@ -1,6 +1,18 @@
-(ns advc.core)
+(ns advc.core
+  "Some util functions shared between different exercises."
+  (:require [clojure.java.io :as io]))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(defn data-lines
+  "Returns all line of `base-name`."
+  [base-name]
+  (with-open [f (io/reader (io/resource (format "%s.data" (name base-name))))]
+    (doall (line-seq f))))
+
+(defn re-map
+  "Transform a line matching a regex to a map.
+  Useful when parsing lines according to a certain pattern:
+  `(map (partial re-map my-regex [:foo :bar]) (data-lines \"file\"))`"
+  [re keys line]
+  (if-let [[_ & groups] (re-find re line)]
+    (zipmap keys groups)
+    {}))
