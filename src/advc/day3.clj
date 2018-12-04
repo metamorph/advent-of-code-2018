@@ -31,4 +31,10 @@
                             (let [freqs (frequencies coords)]
                               (merge-with (fn [v _] (inc v)) s freqs)))
                           {} areas)]
-    (count (filter (fn [[_ v]] (> v 1)) processed))))
+    (filter (fn [[_ v]] (> v 1)) processed)))
+
+(defn solve-2 [areas]
+  (let [overlapped (keys (solve-1a areas))]
+    (filter (fn [{:keys [coords] :as m}]
+                      (empty? (clojure.set/intersection coords (set overlapped))))
+                    areas)))
