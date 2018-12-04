@@ -16,3 +16,12 @@
   (if-let [[_ & groups] (re-find re line)]
     (zipmap keys groups)
     {}))
+
+(defn map-vals [f m]
+  (reduce (fn [a [k v]] (assoc a k (f k v)))
+          {}
+          m))
+
+(defn permutations
+  "Create pairs of permutations of elements in col."
+  [col] col)
