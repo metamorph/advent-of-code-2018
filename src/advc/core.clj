@@ -17,6 +17,14 @@
     (zipmap keys groups)
     {}))
 
+(defn re-map2 [re mappings str]
+  (if-let [[_ & groups] (re-find re str)]
+    (do (assert (= (count groups) (count mappings))
+                "Group count does not match mappings!")
+        (reduce (fn [m [[k f] s]] (assoc m k (f s)))
+                {} (map vector mappings groups)))
+    {}))
+
 (defn map-vals [f m]
   (reduce (fn [a [k v]] (assoc a k (f k v)))
           {}
