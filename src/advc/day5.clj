@@ -18,6 +18,7 @@
        result))))
 
 (defn react [polymer]
+  (println "Reacting")
   (loop [input polymer]
     (let [reacted (react-once input)]
       (if (= (count reacted) (count input))
@@ -29,3 +30,25 @@
 
 (defn solve-1 [polymer]
   (count (react polymer)))
+
+(def all-chars
+  (map char (range (int \a) (inc (int \z)))))
+
+(defn same-char? [c c']
+  (let [d (char-diff c c')]
+    (or (= d 0) (= d 32))))
+
+
+(defn filtered-polymer [polymer c]
+  (filter (complement (partial same-char? c)) polymer))
+
+;; SLOW!
+(defn solve-2 [polymer]
+  (let [reduced (react polymer)]
+   (count (->> (map (fn [c] [c (react (filtered-polymer reduced c))])
+                    all-chars)
+               (sort-by #(count (last %)))
+               first
+               last))))
+
+
