@@ -17,8 +17,18 @@
          (recur (conj result a) (drop 1 input)))
        result))))
 
+(defn react-better [polymer]
+  (loop [stack '()
+         input polymer]
+    (let [stack-head (first stack)
+          next (first input)]
+      (if next
+        (if (reacts? next stack-head)
+          (recur (rest stack) (rest input))
+          (recur (conj stack next) (rest input)))
+        (reverse stack)))))
+
 (defn react [polymer]
-  (println "Reacting")
   (loop [input polymer]
     (let [reacted (react-once input)]
       (if (= (count reacted) (count input))
@@ -29,7 +39,7 @@
 (def puzzle-input (first (core/data-lines "day5")))
 
 (defn solve-1 [polymer]
-  (count (react polymer)))
+  (count (react-better polymer)))
 
 (def all-chars
   (map char (range (int \a) (inc (int \z)))))
@@ -44,8 +54,8 @@
 
 ;; SLOW!
 (defn solve-2 [polymer]
-  (let [reduced (react polymer)]
-   (count (->> (map (fn [c] [c (react (filtered-polymer reduced c))])
+  (let [reduced (react-better polymer)]
+   (count (->> (map (fn [c] [c (react-better (filtered-polymer reduced c))])
                     all-chars)
                (sort-by #(count (last %)))
                first
