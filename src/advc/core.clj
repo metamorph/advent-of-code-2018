@@ -29,7 +29,3 @@
   (reduce (fn [a [k v]] (assoc a k (f k v)))
           {}
           m))
-
-(defn permutations
-  "Create pairs of permutations of elements in col."
-  [col] col)
