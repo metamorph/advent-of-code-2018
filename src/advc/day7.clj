@@ -22,11 +22,12 @@
 
 (def test-input (parse-lines test-data))
 (def puzzle-input (parse-lines (core/data-lines "day7")))
+(def puzzle-input2 (parse-lines (core/data-lines "day71")))
 
 (defn starting-point [graph]
   (let [edges (set (reduce concat '() (vals graph)))
         nodes (set (reduce conj '() (keys graph)))]
-    (first (clojure.set/difference nodes edges))))
+    (first (sort (clojure.set/difference nodes edges)))))
 
 (defn req-parents [graph edge]
   (reduce (fn [s [k edges]]
@@ -40,11 +41,11 @@
            candidates #{} ;; The candidates to select from
            result (list start)]
       (let [edges (get graph node)
-            candidates (set (concat edges candidates))
+            candidates (clojure.set/difference (set (concat edges candidates)) (set result))
             selected (first (filter (fn [c]
                                       ;; Only select candidate if all of its prereqs is in result
                                       (let [reqs (req-parents graph c)]
-                                        (clojure.set/subset? reqs (set result))))
+                                        (empty? (clojure.set/intersection reqs (clojure.set/difference candidates #{c})))))
                                     (sort candidates)))]
         (if selected
           (recur selected (clojure.set/difference candidates #{selected}) (conj result selected))
