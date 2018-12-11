@@ -24,10 +24,10 @@
 (def puzzle-input (parse-lines (core/data-lines "day7")))
 (def puzzle-input2 (parse-lines (core/data-lines "day71")))
 
-(defn starting-point [graph]
+(defn starting-points [graph]
   (let [edges (set (reduce concat '() (vals graph)))
         nodes (set (reduce conj '() (keys graph)))]
-    (first (sort (clojure.set/difference nodes edges)))))
+    (sort (clojure.set/difference nodes edges))))
 
 (defn req-parents [graph edge]
   (reduce (fn [s [k edges]]
@@ -35,21 +35,34 @@
               (conj s k)
               s)) #{} graph))
 
+(defn requirements [graph]
+  (reduce (fn [m [k edges]]
+            (reduce (fn [m e]
+                      (update m e conj k)) m edges))
+          {} graph))
+
 (defn solve-1 [graph]
-  (let [start (starting-point graph)]
-    (loop [node start ;; The current node
-           candidates #{} ;; The candidates to select from
-           result (list start)]
+  (let [starts (starting-points graph)
+        start (first starts)
+        reqs (requirements graph)]
+    (loop [idx 0
+           node start ;; The current node
+           candidates (set starts) ;; The candidates to select from
+           completed (list start)]
       (let [edges (get graph node)
-            candidates (clojure.set/difference (set (concat edges candidates)) (set result))
+            candidates (clojure.set/difference (set (concat edges candidates)) (set completed))
             selected (first (filter (fn [c]
-                                      ;; Only select candidate if all of its prereqs is in result
-                                      (let [reqs (req-parents graph c)]
-                                        (empty? (clojure.set/intersection reqs (clojure.set/difference candidates #{c})))))
+                                      (let [r (set (get reqs c []))
+                                            v (conj (set completed) node)
+                                            pass? (clojure.set/subset? r v)]
+                                       pass?))
                                     (sort candidates)))]
         (if selected
-          (recur selected (clojure.set/difference candidates #{selected}) (conj result selected))
-          (apply str (reverse result)))))))
+          (recur (inc idx) selected (clojure.set/difference candidates #{selected}) (conj completed selected))
+          (apply str (reverse completed)))))))
 
+(defn work-time [c] (inc (- (int (first c)) (int \A))))
 
+(defn solve-2 [graph n-workers]
+  (let [start-nodes (starting-points graph)])
 
